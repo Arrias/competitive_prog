@@ -1,52 +1,3 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <set>
-#include <cmath>
-#include <iomanip>
-#include <complex>
-#include <queue>
-#include <cassert>
-#include <stack>
-#include <random>
-#include <chrono>
-#include <map>
-#define forn(i, n) for (int i = 0; i < n; ++i)
-#define all(a) begin(a), end(a)
-#define int long long
-#define sqr(x) ((x) * (x))
-
-#ifndef _debug
-    #define debug(...) 42
-    #define debr(...) 42
-#else
-    #define debug(x) cout << #x << " = " << x << endl
-    #define debr(...) { cout << #__VA_ARGS__ << " = ";  _debr(__VA_ARGS__); }
-#endif
-
-using namespace std;
-
-template<class Iter> 
-void _debr(Iter l, Iter r) {
-    cout << "[";
-    for (auto it = l; it != r; ++it) {
-        if (it != l) {
-            cout << ", ";   
-        }
-        cout << *it;
-    }
-    cout << "]" << endl;
-}
-
-template<class C, class F> 
-ostream& operator<<(ostream &out, pair<C, F> p) {
-    return out << "(" << p.first << ", " << p.second << ")";
-}
-
-using ll = long long;
-
-mt19937_64 rnd(std::chrono::system_clock::now().time_since_epoch().count());
-
 template<typename T>
 struct RB_tree {
     int black = 0, red = 1;
@@ -54,10 +5,10 @@ struct RB_tree {
     struct Node {
         T x;
         int cl;
-        Node * l, *r, *parent;
+        Node * sons[2]{}, *parent;
 
         bool isTerm() const {
-            return !l;
+            return !sons[0];
         }
 
         void swp() {
@@ -65,21 +16,11 @@ struct RB_tree {
         }
 
         Node * other(Node * son) {
-            return l == son ? r : l;
+            return sons[0] == son ? sons[1] : sons[0];
         }
 
         int sonId(Node * son) {
-            return (l == son) ^ 1;
-        }
-
-        void setLson(Node * left) {
-            left->parent = this;
-            l = left;
-        }
-
-        void setRson(Node * right) {
-            right->parent = this;
-            r = right;
+            return (sons[0] == son) ^ 1;
         }
 
         void setSon(int i, Node * son) {
@@ -287,23 +228,3 @@ struct RB_tree {
         traverse(a->sons[1], func);
     }
 };
-
-signed main() {
-    ios::sync_with_stdio(false);
-    cin.tie(0);
-
-    RB_tree<int> a;
-    forn(i, 100) a.insert(i);
-
-    set<int> st;
-    forn(i, 100) st.insert(i);
-    forn(i, 100) {
-        a.erase(i);
-        st.erase(i);
-        set<int> vt;
-        a.traverse(a.root, [&](int y) {vt.insert(y);});
-        assert(vt == st);
-    }
-
-    return 0;
-}

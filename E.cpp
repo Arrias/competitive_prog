@@ -59,15 +59,15 @@ struct RB_tree {
             return l == nullptr;
         }
 
-        void swp() {
+        inline void swp() {
             cl ^= 1;
         }
 
-        Node * other(Node * son) {
+        inline Node * other(Node * son) {
             return (son == l) ? r : l;
         }
 
-        void setLson(Node * left) {
+        inline void setLson(Node * left) {
             left->parent = this;
             l = left;
         }
@@ -419,18 +419,21 @@ signed main() {
     ios::sync_with_stdio(false);
     cin.tie(0); 
 
-    RB_tree a;
-    forn(i, 100) a.insert(i);
+    RB_tree<int> a;
+    forn(i, 10000000) a.insert(i);
+    forn(i, 10000000) a.erase(i);
+    // RB_tree a;
+    // forn(i, 100) a.insert(i);
 
-    set<int> st;
-    forn(i, 100) st.insert(i);
-    forn(i, 100) {
-        a.erase(i);
-        st.erase(i);
-        set<int> vt;
-        a.traverse(a.root, [&](int y) {vt.insert(y);});
-        assert(vt == st);
-    }
+    // set<int> st;
+    // forn(i, 100) st.insert(i);
+    // forn(i, 100) {
+    //     a.erase(i);
+    //     st.erase(i);
+    //     set<int> vt;
+    //     a.traverse(a.root, [&](int y) {vt.insert(y);});
+    //     assert(vt == st);
+    // }
 
     // RB_tree a;
     // forn(i, 1000) {
