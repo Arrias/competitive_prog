@@ -1,0 +1,3 @@
+echo "Compiling smart..."
+g++ G.cpp -o _stressSource/smart # change letter of task
+time _stressSource/smart < ../input.txt
