@@ -48,13 +48,11 @@ using ll = long long;
 mt19937_64 rnd(std::chrono::system_clock::now().time_since_epoch().count());
 
 struct RB_tree {
-    enum color {
-        black, red    
-    };
+    int black = 0;
+    int red = 1;
 
     struct Node {
-        int x;
-        color cl;
+        int x, cl;
         Node *l, *r, *parent;
 
         bool isTerm() const {
@@ -62,7 +60,7 @@ struct RB_tree {
         }
 
         void swp() {
-            cl = (cl == red) ? black : red;
+            cl ^= 1;
         }
 
         Node * other(Node * son) {
@@ -79,7 +77,7 @@ struct RB_tree {
             r = right;
         }
 
-        Node(int x, color cl, Node *oth, Node *par) :
+        Node(int x, int cl, Node *oth, Node *par) :
              x(x), cl(cl), l(oth), r(oth), parent(par) {}
     };
 
@@ -88,13 +86,11 @@ struct RB_tree {
 
     Node * rotateRight(Node * p) {
         auto a = p->l;
+        a->parent = p->parent;
         if (p->parent) {
-            if (p->parent->l == p) {
-                p->parent->setLson(a);
-            } else {
-                p->parent->setRson(a);
-            }
-        }
+            (p->parent->l == p) ? p->parent->setLson(a) 
+                : p->parent->setRson(a);
+        } 
         p->setLson(a->r);
         a->setRson(p);
         return a;
@@ -103,6 +99,10 @@ struct RB_tree {
     Node * rotateLeft(Node * p) {
         auto a = p->r;
         a->parent = p->parent;
+        if (p->parent) {
+            (p->parent->l == p) ? p->parent->setLson(a) 
+                : p->parent->setRson(a);
+        } 
         p->setRson(a->l);
         a->setLson(p);
         return a;
@@ -129,6 +129,7 @@ struct RB_tree {
             parent->swp();
             parent->r->swp();
         }
+
         return parent;
     }
 
@@ -153,6 +154,7 @@ struct RB_tree {
             parent->swp();
             parent->l->swp();
         }
+
         return parent;
     }
 
@@ -165,8 +167,9 @@ struct RB_tree {
         if (a->x >= key) {
             auto ret = insert(a->l, a, key, chg);
             if (chg) return ret;
+
             a->l = ret;
-            if (!(a->cl == red && a->l->cl == red)) return a;
+            if (a->cl == black || a->l->cl == black) return a;
 
             changed = true;
             return fixLeft(a, parent);
@@ -174,15 +177,16 @@ struct RB_tree {
         else {
             auto ret = insert(a->r, a, key, chg);
             if (chg) return ret;
+            
             a->r = ret;
-            if (!(a->cl == red && a->r->cl == red)) return a;
+            if (a->cl == black || a->r->cl == black) return a;
 
             changed = true;
             return fixRight(a, parent);
         }
     }
 
-    Node * fixRightSon(Node * a, bool &isFixed) {
+    Node * fixBlackHeightRightSon(Node * a, bool &isFixed) {
         isFixed = true;
 
         auto b = a->l;
@@ -250,7 +254,7 @@ struct RB_tree {
         return a;
     }
 
-    Node * fixLeftSon(Node * a, bool &isFixed) {
+    Node * fixBlackHeightLeftSon(Node * a, bool &isFixed) {
         isFixed = true;
 
         auto b = a->r;
@@ -336,7 +340,7 @@ struct RB_tree {
                 while (!df->r->isTerm()) df = df->r;
                 a->x = df->x;
                 a->l = erase(a->l, df->x, isFixed);
-                return isFixed ? a : fixLeftSon(a, isFixed);
+                return isFixed ? a : fixBlackHeightLeftSon(a, isFixed);
             }
 
             isFixed = true;
@@ -347,11 +351,11 @@ struct RB_tree {
 
         if (a->x > key) {
             a->l = erase(a->l, key, isFixed);
-            return isFixed ? a : fixLeftSon(a, isFixed);
+            return isFixed ? a : fixBlackHeightLeftSon(a, isFixed);
         } 
         else {
             a->r = erase(a->r, key, isFixed);
-            return isFixed ? a : fixRightSon(a, isFixed);
+            return isFixed ? a : fixBlackHeightRightSon(a, isFixed);
         }
     }
 
@@ -416,12 +420,25 @@ signed main() {
     cin.tie(0); 
 
     RB_tree a;
-    forn(i, 100) {
-        a.insert(i);
-    }
+    forn(i, 100) a.insert(i);
+
+    set<int> st;
+    forn(i, 100) st.insert(i);
     forn(i, 100) {
         a.erase(i);
+        st.erase(i);
+        set<int> vt;
+        a.traverse(a.root, [&](int y) {vt.insert(y);});
+        assert(vt == st);
     }
+
+    // RB_tree a;
+    // forn(i, 1000) {
+    //     a.insert(i);
+    // }
+    // forn(i, 1000) {
+    //     a.erase(i);
+    // }
     // a.erase(0); a.print();
     // a.erase(1); a.print();
 
